@@ -55,7 +55,7 @@ class UserController extends AbstractController
         $em->persist($user);
         $em->flush();
 
-        return $this->json($user);
+        return $this->json(['user' => $user]);
     }
 
     /**
@@ -70,7 +70,7 @@ class UserController extends AbstractController
         $user = $this->getDoctrine()->getRepository(User::class)->findOneBy(['email' => $data['email']]);
         if ($user instanceof User) {
             if ($passwordEncoder->isPasswordValid($user, $data['password'])) {
-                return $this->json($user);
+                return $this->json(['user' => $user]);
             }
         }
         throw new JsonHttpException(400, 'Bad Request');

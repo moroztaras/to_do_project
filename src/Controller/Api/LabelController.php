@@ -50,7 +50,7 @@ class LabelController extends AbstractController
         $em->persist($label);
         $em->flush();
 
-        return $this->json($label);
+        return $this->json(['label' => $label]);
     }
 
     /**
@@ -86,7 +86,7 @@ class LabelController extends AbstractController
             $em->persist($label);
             $em->flush();
 
-            return $this->json($label);
+            return $this->json(['label' => $label]);
         }
 
         throw new JsonHttpException(400, 'Bad Request');
@@ -105,7 +105,7 @@ class LabelController extends AbstractController
         $em->persist($label);
         $em->flush();
 
-        return $this->json($label);
+        return $this->json(['label' => $label]);
     }
 
     /**
@@ -120,6 +120,6 @@ class LabelController extends AbstractController
             $em->flush();
         }
 
-        return $this->json($label);
+        return $this->json(['label' => $label]);
     }
 }

@@ -50,7 +50,7 @@ class ItemController extends AbstractController
         $em->persist($checkList);
         $em->flush();
 
-        return $this->json($item);
+        return $this->json(['item' => $item]);
     }
 
     /**
@@ -92,7 +92,7 @@ class ItemController extends AbstractController
                 $em->persist($item);
                 $em->flush();
 
-                return $this->json($item);
+                return $this->json(['item' => $item]);
             }
         }
 
