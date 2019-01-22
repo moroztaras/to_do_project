@@ -50,7 +50,7 @@ class CheckListController extends AbstractController
         $em->persist($user);
         $em->flush();
 
-        return $this->json($checklist);
+        return $this->json(['checklist' =>$checklist]);
     }
 
     /**
@@ -76,7 +76,7 @@ class CheckListController extends AbstractController
             $em->persist($checkList);
             $em->flush();
 
-            return $this->json($checkList);
+            return $this->json(['checklist' =>$checkList]);
         }
 
         throw new JsonHttpException(400, 'Bad Request');
@@ -94,7 +94,7 @@ class CheckListController extends AbstractController
             $em->remove($checkList);
             $em->flush();
 
-            return $this->json($checkList);
+            return $this->json(['checklist' =>$checkList]);
         }
 
         throw new JsonHttpException(400, 'Bad Request');
