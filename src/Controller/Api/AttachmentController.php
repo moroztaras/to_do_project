@@ -77,7 +77,7 @@ class AttachmentController extends AbstractController
                     $em->persist($item);
                     $em->flush();
 
-                    return $this->json(['user'=>$user]);
+                    return $this->json(['user' => $user]);
                 }
             }
         }
