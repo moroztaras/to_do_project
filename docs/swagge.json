@@ -140,7 +140,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Checklist ddeleted"
+                        "description": "Checklist deleted"
                     }
                 }
             }
