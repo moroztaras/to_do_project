@@ -1,7 +1,7 @@
 security:
     encoders:
         App\Entity\User:
-            algorithm: bcrypt
+            algorithm: argon2i
 
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
@@ -14,14 +14,17 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        api:
+            pattern: ^/api/
+            anonymous: true
+            guard:
+                authenticators:
+                    - App\Security\ApiAuthenticator
         main:
             anonymous: true
-            logout: ~
-
-            pattern: ^/api/
             guard:
-                  authenticators:
-                        - App\Security\TokenAuthenticator
+                authenticators:
+                    - App\Security\ApiAuthenticator
 
             # activate different ways to authenticate
 
