@@ -1,0 +1,295 @@
+nelmio_api_doc:
+    areas: # to filter documented areas
+        path_patterns:
+            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+
+    documentation:
+        info:
+            title: ToDo List API
+            description: API using Symfony framework
+            version: 1.0.1
+        securityDefinitions:
+            ApiAuth:
+                type: apiKey
+                name: x-api-key
+                in: header
+        paths:
+            /api/user/login:
+                post:
+                    tags:
+                        - User API
+                    description: Login into the api
+                    produces:
+                        - application/json
+                    parameters:
+                        - name: user
+                          description: User to login
+                          in: body
+                          required: true
+                          schema:
+                              type: object
+                              properties:
+                                  email:
+                                      type: string
+                                  plainPassword:
+                                      type: string
+                    responses:
+                        '200':
+                            description: Login successful
+                            schema:
+                                type: object
+                                properties:
+                                    token:
+                                        type: string
+                        '400':
+                            description: Bad request or credentials
+
+            /api/user/registration:
+                post:
+                    tags:
+                        - User API
+                    description: Registration new user
+                    produces:
+                        - application/json
+                    parameters:
+                        - name: user
+                          description: User to be registered
+                          in: body
+                          required: true
+                          schema:
+                              type: object
+                              properties:
+                                  email:
+                                      type: string
+                                  plainPassword:
+                                      type: string
+                    responses:
+                        '200':
+                            description: Registration successful
+                            schema:
+                                type: object
+                                properties:
+                                    api-token:
+                                        type: string
+                        '400':
+                            description: Bad request
+
+            /api/lists:
+                post:
+                    tags:
+                        - ItemList API
+                    description: Create new ItemList
+                    produces:
+                        - application/json
+                    parameters:
+                        - name: itemList
+                          description: ItemList to be created
+                          in: body
+                          required: true
+                          schema:
+                              type: object
+                              properties:
+                                  name:
+                                      type: string
+                                  labels:
+                                      type: array
+                                      items:
+                                          type: object
+                                          properties:
+                                              title:
+                                                  type: string
+                    responses:
+                        '200':
+                            description: List have been created successfully
+                            schema:
+                                type: object
+                                properties:
+                                    id:
+                                        type: integer
+                                    name:
+                                        type: string
+                                    labels:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                title:
+                                                    type: string
+                        '400':
+                            description: Bad request
+                    security:
+                        - ApiAuth: []
+                get:
+                    tags:
+                        - ItemList API
+                    description: Get list of ItemLists
+                    produces:
+                        - application/json
+                    parameters:
+                        - name: startId
+                          description: First ID to be showed
+                          in: query
+                          required: false
+                          type: integer
+                        - name: labelId
+                          description: LabelId
+                          in: query
+                          required: false
+                          type: integer
+                    responses:
+                        '200':
+                            description: List of ItemLists
+                            schema:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        id:
+                                            type: integer
+                                        name:
+                                            type: string
+                                        labels:
+                                            type: array
+                                            items:
+                                                type: object
+                                                properties:
+                                                    title:
+                                                        type: string
+                        '400':
+                            description: Bad request
+                    security:
+                        - ApiAuth: []
+
+            /api/list/{id}:
+                post:
+                    tags:
+                        - ItemList API
+                    description: Create new Item
+                    produces:
+                        - application/json
+                    parameters:
+                        - name: id
+                          in: path
+                          description: ID of ItemList where to add Item
+                          required: true
+                          type: integer
+                        - name: item
+                          description: Item to be created
+                          in: body
+                          required: true
+                          schema:
+                              type: object
+                              properties:
+                                  title:
+                                      type: string
+                                  expiration:
+                                      type: string
+                                      format: date-time
+                    responses:
+                        '200':
+                            description: List have been created successfully
+                            schema:
+                                type: object
+                                properties:
+                                    id:
+                                        type: integer
+                                    name:
+                                        type: string
+                                    labels:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                title:
+                                                    type: string
+                        '400':
+                            description: Bad request
+                    security:
+                        - ApiAuth: []
+                get:
+                    tags:
+                        - ItemList API
+                    description: Show list
+                    produces:
+                        - application/json
+                    parameters:
+                        - name: id
+                          in: path
+                          description: ID of ItemList to be showed
+                          required: true
+                          type: integer
+                    responses:
+                        '200':
+                            description: List information
+                            schema:
+                                type: object
+                                properties:
+                                    id:
+                                        type: integer
+                                    name:
+                                        type: string
+                                    labels:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                title:
+                                                    type: string
+                        '400':
+                            description: Bad request
+                    security:
+                        - ApiAuth: []
+
+            /api/list/{id}/task/{item}:
+                put:
+                    tags:
+                        - ItemList API
+                    description: Edit Item
+                    produces:
+                        - application/json
+                    parameters:
+                        - name: id
+                          in: path
+                          description: ID of ItemList where item exist
+                          required: true
+                          type: integer
+                        - name: item
+                          in: path
+                          description: ID of Item which need to be edit
+                          required: true
+                          type: integer
+                        - name: item object
+                          description: Item to be rewrite
+                          in: body
+                          required: true
+                          schema:
+                              type: object
+                              properties:
+                                  title:
+                                      type: string
+                                  expiration:
+                                      type: string
+                                      format: date-time
+                                  isChecked:
+                                      type: boolean
+                    responses:
+                        '200':
+                            description: List have been edit successfully
+                            schema:
+                                type: object
+                                properties:
+                                    id:
+                                        type: integer
+                                    name:
+                                        type: string
+                                    labels:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                title:
+                                                    type: string
+                        '400':
+                            description: Bad request
+                    security:
+                        - ApiAuth: []
