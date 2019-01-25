@@ -5,11 +5,14 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
+ * @UniqueEntity("email")
+ * @ORM\EntityListeners({"App\Listener\UserListener"})
  */
 class User implements UserInterface, \JsonSerializable
 {
@@ -21,8 +24,11 @@ class User implements UserInterface, \JsonSerializable
     private $id;
 
     /**
-     * @Assert\Email()
      * @ORM\Column(type="string", length=180, unique=true)
+     * @Assert\Email()
+     * @Assert\NotNull(
+     *     message = "Email should not be blank"
+     * )
      */
     private $email;
 
@@ -32,31 +38,37 @@ class User implements UserInterface, \JsonSerializable
     private $roles = [];
 
     /**
-     * @Assert\NotBlank()
-     * @Assert\Length(min="6", max="10")
-     *
      * @var string The hashed password
      * @ORM\Column(type="string")
      */
     private $password;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @Assert\NotNull(
+     *     message = "Password should not be blank"
+     * )
+     * @Assert\Length(
+     *      min = 5,
+     *      max = 20,
+     *      minMessage = "Your password must be at least {{ limit }} characters long",
+     *      maxMessage = "Your password cannot be longer than {{ limit }} characters"
+     * )
+     */
+    private $plainPassword;
+
+    /**
+     * @ORM\Column(type="string", unique=true)
      */
     private $apiToken;
 
     /**
-     * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="App\Entity\CheckList", mappedBy="user", cascade={"persist"})
+     * @ORM\OneToMany(targetEntity="App\Entity\ItemList", mappedBy="user")
      */
-    private $checkLists;
+    private $ItemLists;
 
-    /**
-     * User constructor.
-     */
     public function __construct()
     {
-        $this->checkLists = new ArrayCollection();
+        $this->ItemLists = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -81,9 +93,9 @@ class User implements UserInterface, \JsonSerializable
      *
      * @see UserInterface
      */
-    public function getUserName(): string
+    public function getUsername(): string
     {
-        return (string) $this->email;
+        return (string)$this->email;
     }
 
     /**
@@ -110,12 +122,50 @@ class User implements UserInterface, \JsonSerializable
      */
     public function getPassword(): string
     {
-        return (string) $this->password;
+        return (string)$this->password;
     }
 
     public function setPassword(string $password): self
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPlainPassword()
+    {
+        return $this->plainPassword;
+    }
+
+    /**
+     * @param string|null $plainPassword
+     * @return User
+     */
+    public function setPlainPassword(?string $plainPassword): self
+    {
+        $this->plainPassword = $plainPassword;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getApiToken()
+    {
+        return $this->apiToken;
+    }
+
+    /**
+     * @param string|null $apiToken
+     * @return User
+     */
+    public function setApiToken(?string $apiToken): self
+    {
+        $this->apiToken = $apiToken;
 
         return $this;
     }
@@ -137,14 +187,33 @@ class User implements UserInterface, \JsonSerializable
         // $this->plainPassword = null;
     }
 
-    public function getApiToken(): ?string
+    /**
+     * @return Collection|ItemList[]
+     */
+    public function getItemLists(): Collection
     {
-        return $this->apiToken;
+        return $this->ItemLists;
     }
 
-    public function setApiToken(string $apiToken): self
+    public function addItemList(ItemList $itemList): self
     {
-        $this->apiToken = $apiToken;
+        if (!$this->ItemLists->contains($itemList)) {
+            $this->ItemLists[] = $itemList;
+            $itemList->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeItemList(ItemList $itemList): self
+    {
+        if ($this->ItemLists->contains($itemList)) {
+            $this->ItemLists->removeElement($itemList);
+            // set the owning side to null (unless already changed)
+            if ($itemList->getUser() === $this) {
+                $itemList->setUser(null);
+            }
+        }
 
         return $this;
     }
@@ -152,41 +221,7 @@ class User implements UserInterface, \JsonSerializable
     public function jsonSerialize()
     {
         return [
-            'id' => $this->getId(),
-            'email' => $this->getEmail(),
-            'apiToken' => $this->getApiToken(),
-            'checkLists' => $this->getCheckLists(),
+            'api-token' => $this->getApiToken()
         ];
-    }
-
-    /**
-     * @return Collection|CheckList[]
-     */
-    public function getCheckLists(): Collection
-    {
-        return $this->checkLists;
-    }
-
-    public function addCheckList(CheckList $checkList): self
-    {
-        if (!$this->checkLists->contains($checkList)) {
-            $this->checkLists[] = $checkList;
-            $checkList->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCheckList(CheckList $checkList): self
-    {
-        if ($this->checkLists->contains($checkList)) {
-            $this->checkLists->removeElement($checkList);
-            // set the owning side to null (unless already changed)
-            if ($checkList->getUser() === $this) {
-                $checkList->setUser(null);
-            }
-        }
-
-        return $this;
     }
 }
