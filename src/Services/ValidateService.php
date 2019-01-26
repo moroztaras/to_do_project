@@ -23,7 +23,8 @@ class ValidateService
     public function validate($object)
     {
         $errors = $this->validator->validate($object);
-        if (count($errors))
+        if (count($errors)) {
             throw new JsonHttpException(400, $errors->get(0)->getMessage());
+        }
     }
 }

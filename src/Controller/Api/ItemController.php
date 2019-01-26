@@ -2,18 +2,17 @@
 
 namespace App\Controller\Api;
 
-use App\Entity\CheckList;
 use App\Entity\Item;
-use App\Exception\JsonHttpException;
+use App\Entity\ItemList;
+use App\Entity\User;
+use App\Security\ApiAuthenticator;
+use App\Services\ItemService;
+use App\Services\ValidateService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-/**
- * @Route("/api/list/{checkList}/item")
- */
 class ItemController extends AbstractController
 {
     /**
@@ -22,80 +21,37 @@ class ItemController extends AbstractController
     private $serializer;
 
     /**
-     * @var ValidatorInterface
+     * @var ValidateService
      */
-    private $validator;
+    private $validateService;
 
-    public function __construct(SerializerInterface $serializer, ValidatorInterface $validator)
+    /**
+     * @var ItemService
+     */
+    private $itemService;
+
+    public function __construct(SerializerInterface $serializer, ValidateService $validateService, ItemService $itemService)
     {
         $this->serializer = $serializer;
-        $this->validator = $validator;
+        $this->validateService = $validateService;
+        $this->itemService = $itemService;
     }
 
     /**
-     * @Route("", methods={"POST"})
+     * @Route("/api/list/{id}/task/{item}", methods={"PUT"}, name="api_task_edit")
      */
-    public function addAction(Request $request, CheckList $checkList)
+    public function taskEditAction(Request $request, ItemList $itemList, Item $item)
     {
-        if (!$content = $request->getContent()) {
-            throw new JsonHttpException(400, 'Bad Request');
-        }
-        $item = $this->serializer->deserialize($request->getContent(), Item::class, 'json');
-        $errors = $this->validator->validate($item);
-        if (count($errors)) {
-            throw new JsonHttpException(400, 'Bad Request');
-        }
-        $checkList->addItem($item);
-        $em = $this->getDoctrine()->getManager();
-        $em->persist($checkList);
-        $em->flush();
+        $user = $this->getDoctrine()->getRepository(User::class)->findOneByApiToken($request->headers->get(ApiAuthenticator::X_API_KEY));
+        /* @var ItemList $itemList */
+        $itemList = $this->getDoctrine()->getRepository(ItemList::class)->findOneById($itemList->getId(), $user);
+        $item = $this->itemService->updateItemFromJson(
+            $this->getDoctrine()->getRepository(Item::class)->findOneByParams($item->getId(), $itemList),
+            $this->serializer->deserialize($request->getContent(), Item::class, 'json')
+        );
+
+        $this->getDoctrine()->getManager()->flush();
 
         return $this->json(['item' => $item]);
-    }
-
-    /**
-     * @Route("/{item}", methods={"DELETE"})
-     */
-    public function removeAction(CheckList $checkList, Item $item)
-    {
-        $user = $this->getUser();
-        $userLists = $user->getCheckLists();
-        if (isset($checkList, $userLists)) {
-            $items = $checkList->getItems();
-            if (isset($item, $items)) {
-                $em = $this->getDoctrine()->getManager();
-                $em->remove($item);
-                $em->flush();
-
-                return $this->json(null, 200);
-            }
-        }
-        throw new JsonHttpException(400, 'Bad Request');
-    }
-
-    /**
-     * @Route("/{item}", methods={"PUT"})
-     */
-    public function updateAction(CheckList $checkList, Item $item)
-    {
-        $user = $this->getUser();
-        $userLists = $user->getCheckLists();
-        if (isset($checkList, $userLists)) {
-            $items = $checkList->getItems();
-            if ($items->contains($item)) {
-                if ($item->getChecked()) {
-                    $item->setChecked(false);
-                } else {
-                    $item->setChecked(true);
-                }
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($item);
-                $em->flush();
-
-                return $this->json(['item' => $item]);
-            }
-        }
-
-        throw new JsonHttpException(400, 'Bad Request');
     }
 }

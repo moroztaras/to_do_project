@@ -15,6 +15,7 @@ class UserListener
 
     /**
      * UserListener constructor.
+     *
      * @param $userService
      */
     public function __construct(EncodeService $userService)
@@ -25,7 +26,8 @@ class UserListener
     /** @PreFlush */
     public function preFlushHandler(User $user)
     {
-        if ($user->getPlainPassword() != null)
+        if (null != $user->getPlainPassword()) {
             $user->setPassword($this->userService->encodeUserPassword($user->getPlainPassword(), $user));
+        }
     }
 }

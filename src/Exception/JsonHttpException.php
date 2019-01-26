@@ -6,6 +6,8 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class JsonHttpException extends HttpException
 {
+    const AUTH_ERROR = 'Authentication error';
+
     /**
      * @var array
      */
@@ -19,7 +21,6 @@ class JsonHttpException extends HttpException
     public function __construct($statusCode, $message = null, $data = [])
     {
         parent::__construct($statusCode, $message);
-
         $this->setData($data);
     }
 

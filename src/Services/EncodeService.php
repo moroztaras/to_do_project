@@ -15,8 +15,8 @@ class EncodeService
     }
 
     /**
-     * @param String|null $plainPassword
-     * @param User $user
+     * @param string|null $plainPassword
+     * @param User        $user
      * @return string|null
      */
     public function encodeUserPassword(?String $plainPassword, User $user)

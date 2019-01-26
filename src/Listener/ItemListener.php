@@ -10,7 +10,8 @@ class ItemListener
     /** @PreFlush */
     public function preFlushHandler(Item $item)
     {
-        if ($item->getIsChecked() == null)
+        if (null == $item->getIsChecked()) {
             $item->setIsChecked(false);
+        }
     }
 }
