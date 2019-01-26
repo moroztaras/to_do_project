@@ -31,16 +31,19 @@ nelmio_api_doc:
                               properties:
                                   email:
                                       type: string
+                                      example: moroztaras@i.ua
                                   plainPassword:
                                       type: string
+                                      example: moroztaras
                     responses:
                         '200':
                             description: Login successful
                             schema:
                                 type: object
                                 properties:
-                                    token:
+                                    api-token:
                                         type: string
+                                        example: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
                         '400':
                             description: Bad request or credentials
 
@@ -61,8 +64,10 @@ nelmio_api_doc:
                               properties:
                                   email:
                                       type: string
+                                      example: moroztaras@i.ua
                                   plainPassword:
                                       type: string
+                                      example: moroztaras
                     responses:
                         '200':
                             description: Registration successful
@@ -71,6 +76,7 @@ nelmio_api_doc:
                                 properties:
                                     api-token:
                                         type: string
+                                        example: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
                         '400':
                             description: Bad request
 
