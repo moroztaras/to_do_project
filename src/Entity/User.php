@@ -95,7 +95,7 @@ class User implements UserInterface, \JsonSerializable
      */
     public function getUsername(): string
     {
-        return (string)$this->email;
+        return (string) $this->email;
     }
 
     /**
@@ -122,7 +122,7 @@ class User implements UserInterface, \JsonSerializable
      */
     public function getPassword(): string
     {
-        return (string)$this->password;
+        return (string) $this->password;
     }
 
     public function setPassword(string $password): self
@@ -142,6 +142,7 @@ class User implements UserInterface, \JsonSerializable
 
     /**
      * @param string|null $plainPassword
+     *
      * @return User
      */
     public function setPlainPassword(?string $plainPassword): self
@@ -161,6 +162,7 @@ class User implements UserInterface, \JsonSerializable
 
     /**
      * @param string|null $apiToken
+     *
      * @return User
      */
     public function setApiToken(?string $apiToken): self
@@ -221,7 +223,7 @@ class User implements UserInterface, \JsonSerializable
     public function jsonSerialize()
     {
         return [
-            'api-token' => $this->getApiToken()
+            'api-token' => $this->getApiToken(),
         ];
     }
 }

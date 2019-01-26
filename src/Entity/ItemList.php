@@ -144,9 +144,9 @@ class ItemList implements \JsonSerializable
     public function jsonSerialize()
     {
         return [
-            "id" => $this->getId(),
-            "name" => $this->getName(),
-            "labels" => $this->getLabels()
+            'id' => $this->getId(),
+            'name' => $this->getName(),
+            'labels' => $this->getLabels(),
         ];
     }
 }

@@ -121,11 +121,11 @@ class Item implements \JsonSerializable
     public function jsonSerialize()
     {
         return [
-            "id" => $this->getId(),
-            "title" => $this->getTitle(),
-            "expiration" => $this->getExpiration(),
-            "isChecked" => $this->getIsChecked(),
-            "attachment" => $this->getAttachment()
+            'id' => $this->getId(),
+            'title' => $this->getTitle(),
+            'expiration' => $this->getExpiration(),
+            'isChecked' => $this->getIsChecked(),
+            'attachment' => $this->getAttachment(),
         ];
     }
 }

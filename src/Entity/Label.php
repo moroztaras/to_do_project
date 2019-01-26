@@ -91,7 +91,7 @@ class Label implements \JsonSerializable
     public function jsonSerialize()
     {
         return [
-            'title' => $this->getTitle()
+            'title' => $this->getTitle(),
         ];
     }
 }
