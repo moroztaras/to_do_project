@@ -73,7 +73,7 @@ class LabelController extends AbstractController
     /**
      * @Route("/{id}", methods={"PUT"})
      */
-    public function editNameAction(Label $label, Request $request)
+    public function editAction(Label $label, Request $request)
     {
         if (!$content = $request->getContent()) {
             throw new JsonHttpException(400, 'Bad Request');
