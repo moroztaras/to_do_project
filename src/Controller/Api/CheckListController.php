@@ -56,7 +56,7 @@ class CheckListController extends AbstractController
     /**
      * @Route("/{id}", methods={"PUT"})
      */
-    public function editNameAction(Request $request, CheckList $checkList)
+    public function editAction(Request $request, CheckList $checkList)
     {
         if (!$content = $request->getContent()) {
             throw new JsonHttpException(400, 'Bad Request');
