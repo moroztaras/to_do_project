@@ -1,0 +1,375 @@
+nelmio_api_doc:
+    areas:
+        path_patterns:
+            - ^/api(?!/doc$)
+    documentation:
+        info:
+            title: ToDo List API
+            description: API using Symfony framework
+            version: 1.0.1
+        securityDefinitions:
+            ApiAuth:
+                type: apiKey
+                name: x-api-key
+                in: header
+
+        paths:
+            /api/users:
+                post:
+                    tags:
+                        - User API
+                    description: Registration new user
+                    produces:
+                        - application/json
+                    parameters:
+                        - name: user
+                          description: User to be registered
+                          in: body
+                          required: true
+                          schema:
+                              type: object
+                              properties:
+                                  email:
+                                      type: string
+                                      example: fake_mail@mail.ua
+                                  plainPassword:
+                                      type: string
+                                      example: fake_password
+                    responses:
+                        '200':
+                            description: Registration successful
+                            schema:
+                                type: object
+                                properties:
+                                    user:
+                                        properties:
+                                            id:
+                                                type: string
+                                                example: 1
+                                            email:
+                                                type: string
+                                                example: fake_mail@mail.ua
+                                            api-token:
+                                                type: string
+                                                example: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+                        '400':
+                            description: Bad request
+            /api/users/login:
+                post:
+                    tags:
+                        - User API
+                    description: User login
+                    produces:
+                        - application/json
+                    parameters:
+                        - name: credentials
+                          description: Credentials to login
+                          in: body
+                          required: true
+                          schema:
+                              type: object
+                              properties:
+                                  email:
+                                      type: string
+                                      example: fake_mail@mail.ua
+                                  plainPassword:
+                                      type: string
+                                      example: fake_password
+                    responses:
+                        '200':
+                            description: Login successful
+                            schema:
+                                type: object
+                                properties:
+                                    user:
+                                        properties:
+                                            id:
+                                                type: string
+                                                example: 1
+                                            email:
+                                                type: string
+                                                example: fake_mail@mail.ua
+                                            api-token:
+                                                type: string
+                                                example: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+                        '400':
+                            description: Bad request or credentials
+            /api/lists:
+                post:
+                    tags:
+                        - ItemList API
+                    description: Create new list
+                    parameters:
+                        - name: ItemList
+                          description: ItemList to be created
+                          in: body
+                          required: true
+                          schema:
+                              type: object
+                              properties:
+                                  title:
+                                      type: string
+                                  labels:
+                                      type: array
+                                      items:
+                                          type: object
+                                          properties:
+                                              title:
+                                                  type: string
+                    responses:
+                        '200':
+                            description: List have been successfully created
+                            schema:
+                                type: object
+                                properties:
+                                    id:
+                                        type: integer
+                                    title:
+                                        type: string
+                                    labels:
+                                      type: array
+                                      items:
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: integer
+                                          title:
+                                            type: string
+                        '400':
+                            description: Bad request
+                    security:
+                        - ApiAuth: []
+                get:
+                    tags:
+                        - ItemList API
+                    description: List user's lists
+                    parameters:
+                        - name: startId
+                          description: First list to be showed
+                          in: query
+                          required: false
+                          type: integer
+                        - name: listsNumber
+                          description: Number of lists to be showed
+                          in: query
+                          required: false
+                          type: integer
+                    responses:
+                        '200':
+                            description: User's lists
+                            schema:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        id:
+                                            type: integer
+                                        title:
+                                            type: string
+                                        labels:
+                                          type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              id:
+                                                type: integer
+                                              title:
+                                                type: string
+                        '400':
+                            description: Bad request
+                    security:
+                        - ApiAuth: []
+            /api/lists/{id}:
+                delete:
+                    tags:
+                        - ItemList API
+                    description: Delete list by id
+                    parameters:
+                        - name: id
+                          description: Id of list to be deleted
+                          in: path
+                          required: true
+                          type: integer
+                    responses:
+                        '200':
+                            description: List have been successfully deleted
+                        '400':
+                            description: Bad request
+                    security:
+                        - ApiAuth: []
+                put:
+                    tags:
+                        - ItemList API
+                    description: Edit list
+                    parameters:
+                      - name: id
+                        description: Id of list to be edit
+                        in: path
+                        required: true
+                        type: integer
+                      - name: ItemList
+                        description: ItemList to be created
+                        in: body
+                        required: true
+                        schema:
+                          type: object
+                          properties:
+                            title:
+                              type: string
+                            labels:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  title:
+                                    type: string
+                    responses:
+                        '200':
+                            description: List have been successfully edited
+                        '400':
+                            description: Bad request
+                    security:
+                        - ApiAuth: []
+                post:
+                    tags:
+                        - Item API
+                    description: Create item and add to list by id
+                    parameters:
+                        - name: id
+                          description: Id of list to add item
+                          in: path
+                          required: true
+                          type: integer
+                        - name: Item
+                          description: Item to be created
+                          in: body
+                          required: true
+                          schema:
+                            type: object
+                            properties:
+                              title:
+                                type: string
+                              expirationDate:
+                                type: string
+                                format: date-time
+                    responses:
+                      '200':
+                        description: Item have been created successfully
+                        schema:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            title:
+                              type: string
+                            expirationDate:
+                              type: string
+                              format: date-time
+                      '400':
+                        description: Bad request
+                    security:
+                        - ApiAuth: []
+                get:
+                  tags:
+                    - ItemList API
+                  parameters:
+                    - name: id
+                      description: Id of list to be showed
+                      in: path
+                      required: true
+                      type: integer
+                  responses:
+                    '200':
+                      description: List have been successfully created
+                      schema:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          title:
+                            type: string
+                          labels:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: integer
+                                title:
+                                  type: string
+                    '400':
+                      description: Bad request
+                  security:
+                    - ApiAuth: []
+            /api/lists/{id}/item/{item}:
+                get:
+                  tags:
+                    - Item API
+                  description: Show item details
+                  parameters:
+                    - name: id
+                      description: Id of list where item saved
+                      in: path
+                      required: true
+                      type: integer
+                    - name: item
+                      description: Item id to be showed
+                      in: path
+                      required: true
+                      type: integer
+                  responses:
+                    '200':
+                      description: Item
+                    '400':
+                      description: Bad request
+                  security:
+                    - ApiAuth: []
+                delete:
+                  tags:
+                    - Item API
+                  description: Delete item
+                  parameters:
+                    - name: id
+                      description: Id of list where item saved
+                      in: path
+                      required: true
+                      type: integer
+                    - name: item
+                      description: Item id to be deleted
+                      in: path
+                      required: true
+                      type: integer
+                  responses:
+                    '200':
+                      description: Item has been successfully deleted
+                    '400':
+                      description: Bad request
+                  security:
+                    - ApiAuth: []
+                put:
+                  tags:
+                    - Item API
+                  description: Edit item
+                  parameters:
+                    - name: id
+                      description: Id of list where item saved
+                      in: path
+                      required: true
+                      type: integer
+                    - name: item
+                      description: Item id to be edit
+                      in: path
+                      required: true
+                      type: integer
+                    - name: isChecked
+                      description: Boolean if item is checked
+                      in: query
+                      required: false
+                      type: boolean
+                  responses:
+                    '200':
+                      description: Item has been successfully edited
+                    '400':
+                      description: Bad request
+                  security:
+                    - ApiAuth: []

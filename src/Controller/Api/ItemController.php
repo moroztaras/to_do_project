@@ -2,17 +2,23 @@
 
 namespace App\Controller\Api;
 
-use App\Entity\CheckList;
-use App\Entity\Item;
-use App\Exception\JsonHttpException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Entity\Item;
+use App\Entity\ItemList;
+use App\Entity\User;
+use App\Exception\JsonHttpException;
+use App\Normalizer\ItemNormalizer;
+use App\Security\ApiAuthenticator;
+use App\Services\ValidateService;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
- * @Route("/api/list/{checkList}/item")
+ * Class ItemController.
+ *
+ * @Route("/api/lists/{id}")
  */
 class ItemController extends AbstractController
 {
@@ -22,80 +28,83 @@ class ItemController extends AbstractController
     private $serializer;
 
     /**
-     * @var ValidatorInterface
+     * @var ValidateService
      */
-    private $validator;
+    private $validateService;
 
-    public function __construct(SerializerInterface $serializer, ValidatorInterface $validator)
+    /**
+     * ItemController constructor.
+     *
+     * @param SerializerInterface $serializer
+     * @param ValidateService     $validateService
+     */
+    public function __construct(SerializerInterface $serializer, ValidateService $validateService)
     {
         $this->serializer = $serializer;
-        $this->validator = $validator;
+        $this->validateService = $validateService;
     }
 
     /**
-     * @Route("", methods={"POST"})
+     * @Route("", methods={"POST"}, name="api_item_add")
      */
-    public function addAction(Request $request, CheckList $checkList)
+    public function addAction(Request $request, ItemList $itemList)
     {
-        if (!$content = $request->getContent()) {
-            throw new JsonHttpException(400, 'Bad Request');
+        $user = $this->getDoctrine()->getRepository(User::class)->findOneByApiToken($request->headers->get(ApiAuthenticator::X_API_KEY));
+        if (!($itemList->getUser() === $user)) {
+            throw new JsonHttpException(400, 'Bad request');
         }
+        /* @var Item $item */
         $item = $this->serializer->deserialize($request->getContent(), Item::class, 'json');
-        $errors = $this->validator->validate($item);
-        if (count($errors)) {
-            throw new JsonHttpException(400, 'Bad Request');
-        }
-        $checkList->addItem($item);
-        $em = $this->getDoctrine()->getManager();
-        $em->persist($checkList);
-        $em->flush();
+        $this->validateService->validate($item);
 
-        return $this->json(['item' => $item]);
+        $itemList->addItem($item);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->json($item, 200, [], [AbstractNormalizer::GROUPS => [ItemNormalizer::GROUP_DETAILS]]);
     }
 
     /**
-     * @Route("/{item}", methods={"DELETE"})
+     * @Route("/item/{item}", methods={"GET"}, name="api_item_show")
      */
-    public function removeAction(CheckList $checkList, Item $item)
+    public function showAction(Request $request, ItemList $itemList, Item $item)
     {
-        $user = $this->getUser();
-        $userLists = $user->getCheckLists();
-        if (isset($checkList, $userLists)) {
-            $items = $checkList->getItems();
-            if (isset($item, $items)) {
-                $em = $this->getDoctrine()->getManager();
-                $em->remove($item);
-                $em->flush();
-
-                return $this->json(null, 200);
-            }
+        $user = $this->getDoctrine()->getRepository(User::class)->findOneByApiToken($request->headers->get(ApiAuthenticator::X_API_KEY));
+        if (!($itemList->getUser() === $user) || !($item->getItemList() === $itemList)) {
+            throw new JsonHttpException(400, 'Bad request');
         }
-        throw new JsonHttpException(400, 'Bad Request');
+
+        return $this->json($item, 200, [], [AbstractNormalizer::GROUPS => [ItemNormalizer::GROUP_DETAILS]]);
     }
 
     /**
-     * @Route("/{item}", methods={"PUT"})
+     * @Route("/item/{item}", methods={"DELETE"}, name="api_item_delete")
      */
-    public function updateAction(CheckList $checkList, Item $item)
+    public function deleteAction(Request $request, ItemList $itemList, Item $item)
     {
-        $user = $this->getUser();
-        $userLists = $user->getCheckLists();
-        if (isset($checkList, $userLists)) {
-            $items = $checkList->getItems();
-            if ($items->contains($item)) {
-                if ($item->getChecked()) {
-                    $item->setChecked(false);
-                } else {
-                    $item->setChecked(true);
-                }
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($item);
-                $em->flush();
+        $user = $this->getDoctrine()->getRepository(User::class)->findOneByApiToken($request->headers->get(ApiAuthenticator::X_API_KEY));
+        if (!($itemList->getUser() === $user) || !($item->getItemList() === $itemList)) {
+            throw new JsonHttpException(400, 'Bad request');
+        }
+        $this->getDoctrine()->getManager()->remove($item);
+        $this->getDoctrine()->getManager()->flush();
 
-                return $this->json(['item' => $item]);
-            }
+        return $this->json('ok');
+    }
+
+    /**
+     * @Route("/item/{item}", methods={"PUT"}, name="api_item_edit")
+     */
+    public function editAction(Request $request, ItemList $itemList, Item $item)
+    {
+        $user = $this->getDoctrine()->getRepository(User::class)->findOneByApiToken($request->headers->get(ApiAuthenticator::X_API_KEY));
+        if (!($itemList->getUser() === $user) || !($item->getItemList() === $itemList)) {
+            throw new JsonHttpException(400, 'Bad request');
+        }
+        if ($request->query->has('isChecked')) {
+            $item->setIsChecked($request->query->get('isChecked'));
+            $this->getDoctrine()->getManager()->flush();
         }
 
-        throw new JsonHttpException(400, 'Bad Request');
+        return $this->json('ok');
     }
 }

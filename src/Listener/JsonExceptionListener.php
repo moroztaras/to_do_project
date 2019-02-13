@@ -3,20 +3,11 @@
 namespace App\Listener;
 
 use App\Exception\JsonHttpException;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 
 class JsonExceptionListener
 {
-    /** @var LoggerInterface */
-    private $logger;
-
-    public function __construct(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-    }
-
     public function onKernelException(GetResponseForExceptionEvent $event)
     {
         $exception = $event->getException();
@@ -32,7 +23,6 @@ class JsonExceptionListener
             }
             $response = new JsonResponse($errorData);
             $event->setResponse($response);
-            $this->logger->error($exception->getMessage(), $errorData);
         }
     }
 }

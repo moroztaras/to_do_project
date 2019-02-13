@@ -20,23 +20,33 @@ class Label
     private $id;
 
     /**
-     * @Assert\NotBlank()
-     * @Assert\Length(min="3", max="15")
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotNull(
+     *     message = "Label title should not be blank"
+     * )
+     * @Assert\NotBlank(
+     *     message = "Label title should not be blank"
+     * )
+     * @Assert\Length(
+     *      min = 5,
+     *      max = 20,
+     *      minMessage = "Label title must be at least {{ limit }} characters long",
+     *      maxMessage = "Label title cannot be longer than {{ limit }} characters"
+     * )
      */
-    private $name;
+    private $title;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\CheckList", inversedBy="labels")
+     * @ORM\ManyToMany(targetEntity="App\Entity\ItemList", inversedBy="labels")
      */
-    private $checklists;
+    private $itemLists;
 
     /**
      * Label constructor.
      */
     public function __construct()
     {
-        $this->checklists = new ArrayCollection();
+        $this->itemLists = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -44,41 +54,56 @@ class Label
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getTitle(): ?string
     {
-        return $this->name;
+        return $this->title;
     }
 
-    public function setName(string $name): self
+    public function setTitle(string $title): self
     {
-        $this->name = $name;
+        $this->title = $title;
 
         return $this;
     }
 
     /**
-     * @return Collection|CheckList[]
+     * @return Collection|ItemList[]
      */
-    public function getChecklists(): Collection
+    public function getItemLists(): Collection
     {
-        return $this->checklists;
+        return $this->itemLists;
     }
 
-    public function addChecklist(CheckList $checklist): self
+    public function addItemList(ItemList $itemList): self
     {
-        if (!$this->checklists->contains($checklist)) {
-            $this->checklists[] = $checklist;
+        if (!$this->itemLists->contains($itemList)) {
+            $this->itemLists[] = $itemList;
         }
 
         return $this;
     }
 
-    public function removeChecklist(CheckList $checklist): self
+    public function removeItemList(ItemList $itemList): self
     {
-        if ($this->checklists->contains($checklist)) {
-            $this->checklists->removeElement($checklist);
+        if ($this->itemLists->contains($itemList)) {
+            $this->itemLists->removeElement($itemList);
         }
 
         return $this;
+    }
+
+    /**
+     * @return Label
+     */
+    public function setItemListsEmpty(): self
+    {
+        $this->itemLists = new ArrayCollection();
+
+        return $this;
+    }
+
+    public function __toString()
+    {
+        return $this->getTitle();
     }
 }
