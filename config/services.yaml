@@ -35,3 +35,7 @@ services:
     App\Services\UploadService:
         arguments:
             $attachmentDirectory: '%attachment_directory%'
+
+    App\Services\StripeService:
+        arguments:
+            $stripeSecretKey: '%env(STRIPE_SECRET_KEY)%'

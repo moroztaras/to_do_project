@@ -13,7 +13,7 @@ nelmio_api_doc:
                 name: x-api-key
                 in: header
         paths:
-            /api/users:
+            /api/user:
                 post:
                     tags:
                         - User API
@@ -53,7 +53,7 @@ nelmio_api_doc:
                                                 example: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
                         '400':
                             description: Bad request
-            /api/users/login:
+            /api/user/login:
                 post:
                     tags:
                         - User API

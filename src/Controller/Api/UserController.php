@@ -3,6 +3,9 @@
 namespace App\Controller\Api;
 
 use App\Entity\User;
+use App\Model\Card;
+use App\Services\UserService;
+use App\Services\ValidateService;
 use App\Exception\JsonHttpException;
 use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,11 +14,13 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Normalizer\UserNormalizer;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 /**
  * Class UserController.
  *
- * @Route("/api/users")
+ * @Route("/api/user")
  */
 class UserController extends AbstractController
 {
@@ -35,17 +40,24 @@ class UserController extends AbstractController
     private $validator;
 
     /**
+     * @var ValidateService
+     */
+    private $validateService;
+
+    /**
      * UserController constructor.
      *
      * @param SerializerInterface          $serializer
      * @param UserPasswordEncoderInterface $passwordEncoder
      * @param ValidatorInterface           $validator
+     * @param ValidateService              $validateService
      */
-    public function __construct(SerializerInterface $serializer, UserPasswordEncoderInterface $passwordEncoder, ValidatorInterface $validator)
+    public function __construct(SerializerInterface $serializer, UserPasswordEncoderInterface $passwordEncoder, ValidatorInterface $validator, ValidateService $validateService)
     {
         $this->serializer = $serializer;
         $this->passwordEncoder = $passwordEncoder;
         $this->validator = $validator;
+        $this->validateService = $validateService;
     }
 
     /**
@@ -71,11 +83,11 @@ class UserController extends AbstractController
         $this->getDoctrine()->getManager()->persist($user);
         $this->getDoctrine()->getManager()->flush();
 
-        return $this->json(['user' => $user]);
+        return $this->json(['user' => $user], 200, [], [AbstractNormalizer::GROUPS => [UserNormalizer::GROUP_REGISTRATION]]);
     }
 
     /**
-     * @Route("/login", methods={"POST"}, name="api_users_login")
+     * @Route("/login", methods={"POST"}, name="api_user_login")
      */
     public function loginAction(Request $request)
     {
@@ -89,6 +101,28 @@ class UserController extends AbstractController
         $user->setApiToken(Uuid::uuid4());
         $this->getDoctrine()->getManager()->flush();
 
-        return $this->json(['user' => $user]);
+        return $this->json(['user' => $user], 200, [], [AbstractNormalizer::GROUPS => [UserNormalizer::GROUP_REGISTRATION]]);
+    }
+
+    /**
+     * @Route("", methods={"GET"}, name="api_user_this")
+     */
+    public function getUserAction()
+    {
+        return $this->json(['user' => $this->getUser()], 200, [], [AbstractNormalizer::GROUPS => [UserNormalizer::GROUP_PROFILE]]);
+    }
+
+    /**
+     * @Route("/api/user/card", methods={"POST"}, name="api_user_card")
+     */
+    public function addCardAction(Request $request, UserService $userService)
+    {
+        /** @var Card $card */
+        $card = $this->serializer->deserialize($request->getContent(), Card::class, 'json');
+        $this->validateService->validate($card);
+
+        $userService->saveCC($card, $this->getUser());
+
+        return $this->json([]);
     }
 }
