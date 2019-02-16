@@ -29,6 +29,9 @@ class ItemNormalizer implements NormalizerInterface
             if (!empty($item->getExpirationDate())) {
                 $data['expirationDate'] = $item->getExpirationDate()->format('H:i d-m-Y');
             }
+            if (!empty($item->getAttachment())) {
+                $data['attachment'] = $item->getAttachment();
+            }
         }
 
         return $data;
