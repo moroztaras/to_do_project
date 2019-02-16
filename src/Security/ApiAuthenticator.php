@@ -41,7 +41,7 @@ class ApiAuthenticator extends AbstractGuardAuthenticator
     public function getCredentials(Request $request)
     {
         return [
-            'token' => $request->headers->get('X-AUTH-TOKEN'),
+            'token' => $request->headers->get($this::X_API_KEY),
         ];
     }
 
