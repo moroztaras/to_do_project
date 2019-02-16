@@ -58,6 +58,14 @@ class Item implements \JsonSerializable
      */
     private $isChecked;
 
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=255, nullable=true)
+     *
+     * @Assert\File(mimeTypes={"image/png", "image/jpeg"})
+     */
+    private $attachment;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -127,6 +135,18 @@ class Item implements \JsonSerializable
     public function setIsChecked(bool $isChecked): self
     {
         $this->isChecked = $isChecked;
+
+        return $this;
+    }
+
+    public function getAttachment(): ?string
+    {
+        return $this->attachment;
+    }
+
+    public function setAttachment(?string $attachment): self
+    {
+        $this->attachment = $attachment;
 
         return $this;
     }
