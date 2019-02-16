@@ -2,6 +2,7 @@
 /.env
 /.env.test
 /public/bundles/
+/public/uploads/
 /var/
 /vendor/
 .phpunit
