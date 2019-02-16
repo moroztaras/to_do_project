@@ -12,7 +12,6 @@ nelmio_api_doc:
                 type: apiKey
                 name: x-api-key
                 in: header
-
         paths:
             /api/users:
                 post:
@@ -373,3 +372,31 @@ nelmio_api_doc:
                       description: Bad request
                   security:
                     - ApiAuth: []
+            /api/lists/{id}/item/{item}/attachment:
+              post:
+                tags:
+                  - Item API
+                description: Upload/remove attachment
+                parameters:
+                  - name: id
+                    description: Id of list where item saved
+                    in: path
+                    required: true
+                    type: integer
+                  - name: item
+                    description: Item id where to add attachment
+                    in: path
+                    required: true
+                    type: integer
+                  - name: attachment
+                    description: Attachment to add. If let it empty current attachment will be remove
+                    in: formData
+                    required: false
+                    type: file
+                responses:
+                  '200':
+                    description: Attachment successfully upload/remove
+                  '400':
+                    description: Bad request
+                security:
+                  - ApiAuth: []

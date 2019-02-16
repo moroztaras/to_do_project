@@ -5,6 +5,7 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
     locale: 'en'
+    attachment_directory: '%kernel.project_dir%/public/uploads/attachment'
 
 services:
     # default configuration for services in *this* file
@@ -30,3 +31,7 @@ services:
     App\Listener\JsonExceptionListener:
             tags:
                 - { name: 'kernel.event_listener', event: 'kernel.exception', method: 'onKernelException' }
+
+    App\Services\UploadService:
+        arguments:
+            $attachmentDirectory: '%attachment_directory%'

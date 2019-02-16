@@ -14,6 +14,7 @@ use App\Services\ValidateService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
+use App\Services\UploadService;
 
 /**
  * Class ItemController.
@@ -33,15 +34,21 @@ class ItemController extends AbstractController
     private $validateService;
 
     /**
+     * @var UploadService
+     */
+    private $uploadService;
+
+    /**
      * ItemController constructor.
      *
      * @param SerializerInterface $serializer
      * @param ValidateService     $validateService
      */
-    public function __construct(SerializerInterface $serializer, ValidateService $validateService)
+    public function __construct(SerializerInterface $serializer, ValidateService $validateService, UploadService $uploadService)
     {
         $this->serializer = $serializer;
         $this->validateService = $validateService;
+        $this->uploadService = $uploadService;
     }
 
     /**
@@ -104,6 +111,27 @@ class ItemController extends AbstractController
             $item->setIsChecked($request->query->get('isChecked'));
             $this->getDoctrine()->getManager()->flush();
         }
+
+        return $this->json('ok');
+    }
+
+    /**
+     * @Route("/item/{item}/attachment", methods={"POST"}, name="api_item_attachment_add")
+     */
+    public function setAttachmentAction(Request $request, ItemList $itemList, Item $item)
+    {
+        $user = $this->getDoctrine()->getRepository(User::class)->findOneByApiToken($request->headers->get(ApiAuthenticator::X_API_KEY));
+        if (!($itemList->getUser() === $user) || !($item->getItemList() === $itemList)) {
+            throw new JsonHttpException(400, 'Bad request');
+        }
+        if ($request->files->count()) {
+            $attachment = $this->uploadService->uploadAttachment($request->files->get('attachment'));
+            $item->setAttachment($attachment);
+        } else {
+            $item->setAttachment(null);
+        }
+
+        $this->getDoctrine()->getManager()->flush();
 
         return $this->json('ok');
     }
