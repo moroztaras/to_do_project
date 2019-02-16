@@ -67,11 +67,27 @@ class User implements UserInterface
     private $itemLists;
 
     /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $stripeCustomerId;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $card;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Invoice", mappedBy="user")
+     */
+    private $invoices;
+
+    /**
      * User constructor.
      */
     public function __construct()
     {
         $this->itemLists = new ArrayCollection();
+        $this->invoices = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -209,6 +225,61 @@ class User implements UserInterface
             // set the owning side to null (unless already changed)
             if ($itemList->getUser() === $this) {
                 $itemList->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getStripeCustomerId(): ?string
+    {
+        return $this->stripeCustomerId;
+    }
+
+    public function setStripeCustomerId(?string $stripeCustomerId): self
+    {
+        $this->stripeCustomerId = $stripeCustomerId;
+
+        return $this;
+    }
+
+    public function getCard(): ?string
+    {
+        return $this->card;
+    }
+
+    public function setCard(?string $card): self
+    {
+        $this->card = $card;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Invoice[]
+     */
+    public function getInvoices(): Collection
+    {
+        return $this->invoices;
+    }
+
+    public function addInvoice(Invoice $invoice): self
+    {
+        if (!$this->invoices->contains($invoice)) {
+            $this->invoices[] = $invoice;
+            $invoice->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvoice(Invoice $invoice): self
+    {
+        if ($this->invoices->contains($invoice)) {
+            $this->invoices->removeElement($invoice);
+            // set the owning side to null (unless already changed)
+            if ($invoice->getUser() === $this) {
+                $invoice->setUser(null);
             }
         }
 
