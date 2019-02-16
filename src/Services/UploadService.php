@@ -17,7 +17,7 @@ class UploadService
 
     public function uploadAttachment(UploadedFile $file)
     {
-        $fileName = md5(uniqid()) . '.' . $file->guessExtension();
+        $fileName = md5(uniqid()).'.'.$file->guessExtension();
 
         try {
             $file->move($this->getAttachmentDirectory(), $fileName);
